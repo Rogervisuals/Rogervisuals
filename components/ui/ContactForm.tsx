@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useTransition } from "react";
 import { Button } from "./Button";
+import { submitContactForm } from "@/lib/contact/actions";
 
 const inputClass =
   "type-body w-full border border-white/10 bg-shark px-4 py-3.5 text-white placeholder:text-silver/40 transition-colors focus:border-mariner focus:outline-none";
@@ -20,15 +21,34 @@ interface ContactFormProps {
 
 export function ContactForm({ success, projectTypes, budgetRanges }: ContactFormProps) {
   const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    setError(null);
+
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+
+    startTransition(async () => {
+      const result = await submitContactForm({
+        name: String(formData.get("name") ?? ""),
+        email: String(formData.get("email") ?? ""),
+        company: String(formData.get("company") ?? ""),
+        projectType: String(formData.get("projectType") ?? ""),
+        budget: String(formData.get("budget") ?? ""),
+        message: String(formData.get("message") ?? ""),
+      });
+
+      if ("error" in result) {
+        setError(result.error);
+        return;
+      }
+
       setSubmitted(true);
-    }, 800);
+      form.reset();
+    });
   }
 
   if (submitted) {
@@ -43,7 +63,10 @@ export function ContactForm({ success, projectTypes, budgetRanges }: ContactForm
         <p className="type-card-body mt-3">{success.message}</p>
         <button
           type="button"
-          onClick={() => setSubmitted(false)}
+          onClick={() => {
+            setSubmitted(false);
+            setError(null);
+          }}
           className="type-nav mt-6 text-mariner transition-colors hover:text-white"
         >
           {success.resetLabel}
@@ -155,8 +178,14 @@ export function ContactForm({ success, projectTypes, budgetRanges }: ContactForm
         />
       </div>
 
-      <Button type="submit" variant="primary" size="lg" disabled={loading}>
-        {loading ? "Sending..." : "Send Message"}
+      {error && (
+        <p className="type-card-body text-red-400" role="alert">
+          {error}
+        </p>
+      )}
+
+      <Button type="submit" variant="primary" size="lg" disabled={isPending}>
+        {isPending ? "Sending..." : "Send Message"}
       </Button>
     </form>
   );
