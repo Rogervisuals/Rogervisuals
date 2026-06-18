@@ -2,7 +2,7 @@
 
 import { useState, FormEvent, useTransition } from "react";
 import { Button } from "./Button";
-import { submitContactForm } from "@/lib/contact/actions";
+import type { ContactFormSubmission } from "@/lib/contact/send-contact-email";
 
 const inputClass =
   "type-body w-full border border-white/10 bg-shark px-4 py-3.5 text-white placeholder:text-silver/40 transition-colors focus:border-mariner focus:outline-none";
@@ -32,22 +32,40 @@ export function ContactForm({ success, projectTypes, budgetRanges }: ContactForm
     const formData = new FormData(form);
 
     startTransition(async () => {
-      const result = await submitContactForm({
+      const payload: ContactFormSubmission = {
         name: String(formData.get("name") ?? ""),
         email: String(formData.get("email") ?? ""),
         company: String(formData.get("company") ?? ""),
         projectType: String(formData.get("projectType") ?? ""),
         budget: String(formData.get("budget") ?? ""),
         message: String(formData.get("message") ?? ""),
-      });
+      };
 
-      if ("error" in result) {
-        setError(result.error);
-        return;
+      try {
+        const response = await fetch("/api/contact", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const result = (await response.json()) as {
+          success?: boolean;
+          error?: string;
+        };
+
+        if (!response.ok || !result.success) {
+          setError(
+            result.error ??
+              "Something went wrong sending your message. Please try again."
+          );
+          return;
+        }
+
+        setSubmitted(true);
+        form.reset();
+      } catch {
+        setError("Something went wrong sending your message. Please try again.");
       }
-
-      setSubmitted(true);
-      form.reset();
     });
   }
 
