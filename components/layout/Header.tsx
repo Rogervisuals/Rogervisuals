@@ -23,36 +23,14 @@ type Branding = GeneralSettings["branding"];
 
 function MenuIcon({ open }: { open: boolean }) {
   return (
-    <svg
+    <span
       className={cn("mobile-menu-toggle", open && "mobile-menu-toggle--open")}
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
       aria-hidden="true"
     >
-      <path
-        className="mobile-menu-toggle__line mobile-menu-toggle__line--top"
-        d="M4 7h16"
-        stroke="#ffffff"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <path
-        className="mobile-menu-toggle__line mobile-menu-toggle__line--mid"
-        d="M4 12h16"
-        stroke="#ffffff"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <path
-        className="mobile-menu-toggle__line mobile-menu-toggle__line--bot"
-        d="M4 17h16"
-        stroke="#ffffff"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
+      <span className="mobile-menu-toggle__line" />
+      <span className="mobile-menu-toggle__line" />
+      <span className="mobile-menu-toggle__line" />
+    </span>
   );
 }
 
