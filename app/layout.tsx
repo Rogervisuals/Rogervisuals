@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { questrial } from "@/lib/fonts";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -44,6 +45,7 @@ export default function RootLayout({
     <html lang="en" className={`${questrial.variable} h-full`} data-scroll-behavior="smooth">
       <body className="flex min-h-full flex-col bg-shark font-body text-silver antialiased">
         {children}
+        <Analytics />
       </body>
     </html>
   );
